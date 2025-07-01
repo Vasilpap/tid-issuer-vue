@@ -1,28 +1,5 @@
 <template>
   <div class="p-6 space-y-6">
-    <!-- Header -->
-    <header class="flex items-center gap-4">
-      <h1 class="text-2xl font-semibold">Pending company registrations</h1>
-      <button
-        class="ml-auto inline-flex items-center gap-1 rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400"
-        @click="logout"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="h-4 w-4"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M12.75 3.75a.75.75 0 0 1 .75-.75h4.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-4.5a.75.75 0 0 1 0-1.5h4.5A1.5 1.5 0 0 0 21 18V6a1.5 1.5 0 0 0-1.5-1.5h-4.5a.75.75 0 0 1-.75-.75zM15.03 8.47a.75.75 0 0 1 0 1.06L13.56 11H4.75a.75.75 0 0 1 0-1.5h8.81l1.47-1.47a.75.75 0 0 1 1.06 0zm-1.47 6.06 1.47 1.47a.75.75 0 1 1-1.06 1.06l-1.47-1.47H4.75a.75.75 0 0 1 0-1.5h8.81z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        Logout
-      </button>
-    </header>
-
     <!-- States -->
     <div v-if="loading" class="text-gray-500">Loading…</div>
     <div v-else-if="error" class="text-red-600">{{ error }}</div>
@@ -34,10 +11,12 @@
       <div
         v-for="item in items"
         :key="item.id"
-        class="rounded border shadow-sm">
+        class="rounded border shadow-sm"
+      >
         <details class="group">
           <summary
-            class="flex cursor-pointer select-none items-center justify-between gap-2 bg-gray-100 px-4 py-3 text-lg font-medium hover:bg-gray-200 group-open:bg-gray-200">
+            class="flex cursor-pointer select-none items-center justify-between gap-2 bg-gray-100 px-4 py-3 text-lg font-medium hover:bg-gray-200 group-open:bg-gray-200"
+          >
             <span>{{ item.name }}</span>
             <span class="text-sm text-gray-500">{{ formatDate(item.timestamp) }}</span>
           </summary>
@@ -143,17 +122,13 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString();
 }
 
-// --- logout --------------------------------------------------------------
-function logout() {
-  keycloak.logout({ redirectUri: window.location.origin });
-}
-
 onMounted(load);
 </script>
 
 <style scoped>
+/* Hide native arrow for Chrome */
 details > summary::-webkit-details-marker {
-  display: none; /* hide default arrow in Chrome */
+  display: none;
 }
 
 /* subtle open/close animation */
