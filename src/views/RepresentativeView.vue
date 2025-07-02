@@ -1,12 +1,16 @@
 <template>
   <div class="rep-container">
-    <!-- Loading / error states -->
+    <!-- Loading & error messages -->
     <p v-if="loading" class="info">Loading…</p>
     <p v-else-if="error" class="error">{{ error }}</p>
 
-    <!-- No registration yet → show form -->
-    <form v-if="!loading && !error && !registration" class="rep-form" @submit.prevent="submitForm">
-      <h2>Create company registration</h2>
+    <!-- Create / Edit form -->
+    <form
+      v-if="!loading && !error && (!registration || editing)"
+      class="rep-form"
+      @submit.prevent="submitForm"
+    >
+      <h2>{{ editing ? 'Edit registration' : 'Create company registration' }}</h2>
 
       <label>
         Company name
@@ -14,7 +18,7 @@
       </label>
 
       <label>
-        Contact e‑mail
+        Contact e-mail
         <input type="email" v-model="form.email" required />
       </label>
 
@@ -34,15 +38,39 @@
       </label>
 
       <label>
-        Executives (comma‑separated)
+        Executives (comma-separated)
         <input v-model="form.executives" required />
       </label>
 
-      <button type="submit" :disabled="saving">Submit</button>
+      <div class="btn-row">
+        <button type="submit" :disabled="saving">
+          {{ saving ? 'Saving…' : (editing ? 'Save changes' : 'Submit') }}
+        </button>
+        <button
+          v-if="editing"
+          type="button"
+          class="secondary-btn"
+          @click="cancelEdit"
+        >
+          Cancel
+        </button>
+      </div>
     </form>
 
-    <!-- Existing registration → read‑only details -->
+    <!-- Read-only card -->
     <div v-else-if="registration" class="rep-details">
+      <div :class="['status-banner', statusClass]">
+        {{ registration.state }}
+      </div>
+
+      <button
+        v-if="registration.state !== 'ACCEPTED' && !editing"
+        class="edit-btn"
+        @click="startEdit"
+      >
+        Edit
+      </button>
+
       <h2>Your registration</h2>
       <p><strong>Name:</strong> {{ registration.name }}</p>
       <p><strong>Email:</strong> {{ registration.email }}</p>
@@ -60,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useKeycloak } from '@dsb-norge/vue-keycloak-js';
 
 const { keycloak } = useKeycloak();
@@ -68,8 +96,11 @@ const { keycloak } = useKeycloak();
 const loading = ref(false);
 const error = ref(null);
 const registration = ref(null);
+const saving = ref(false);
+const editing = ref(false);
 
 const form = ref({
+  id: undefined,
   name: '',
   email: '',
   goal: '',
@@ -78,14 +109,11 @@ const form = ref({
   executives: '',
 });
 
-const saving = ref(false);
-
 onMounted(fetchRegistration);
 
 async function fetchRegistration() {
   loading.value = true;
   error.value = null;
-
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/registration`, {
       headers: {
@@ -95,7 +123,7 @@ async function fetchRegistration() {
     });
 
     if (res.status === 204) {
-      registration.value = null; // no content → show form
+      registration.value = null;
     } else if (res.ok) {
       registration.value = await res.json();
     } else {
@@ -108,13 +136,25 @@ async function fetchRegistration() {
   }
 }
 
+function startEdit() {
+  if (!registration.value) return;
+  editing.value = true;
+  form.value = { ...registration.value };
+}
+
+function cancelEdit() {
+  editing.value = false;
+}
+
 async function submitForm() {
   if (saving.value) return;
   saving.value = true;
   error.value = null;
+
+  const method = editing.value ? 'PUT' : 'POST';
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/registration`, {
-      method: 'POST',
+      method,
       headers: {
         Authorization: `Bearer ${keycloak.token}`,
         'Content-Type': 'application/json',
@@ -122,103 +162,37 @@ async function submitForm() {
       body: JSON.stringify(form.value),
     });
 
-    if (!res.ok) throw new Error(`Server responded ${res.status}`);
-
-    registration.value = await res.json(); // server returns created object
+    if ([201, 202, 204].includes(res.status)) {
+      await fetchRegistration();
+    } else if (res.ok) {
+      const text = await res.text();
+      registration.value = text ? JSON.parse(text) : null;
+      if (!registration.value) await fetchRegistration();
+    } else {
+      throw new Error(`Server responded ${res.status}`);
+    }
   } catch (e) {
     error.value = e.message ?? 'Submission failed';
   } finally {
     saving.value = false;
+    editing.value = false;
   }
 }
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString();
 }
+
+const statusClass = computed(() => {
+  switch ((registration.value?.state || '').toUpperCase()) {
+    case 'ACCEPTED':
+      return 'status-accepted';
+    case 'DENIED':
+      return 'status-denied';
+    default:
+      return 'status-pending';
+  }
+});
 </script>
 
-<style scoped>
-.rep-container {
-  max-width: 620px;
-  margin: 0 auto;
-}
-
-.info {
-  color: #4b5563; /* gray‑600 */
-}
-
-.error {
-  color: #dc2626; /* red‑600 */
-}
-
-/* ---------- form ---------- */
-.rep-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  background: #fff;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.rep-form h2 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.rep-form label {
-  display: flex;
-  flex-direction: column;
-  font-size: 0.875rem;
-  gap: 0.25rem;
-}
-
-.rep-form input,
-.rep-form textarea {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 0.875rem;
-}
-
-.rep-form button[type="submit"] {
-  align-self: flex-start;
-  background: #2563eb; /* blue‑600 */
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.rep-form button[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ---------- details ---------- */
-.rep-details {
-  background: #fff;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-
-.rep-details h2 {
-  margin-top: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.rep-details p {
-  margin: 0.25rem 0;
-}
-</style>
+<style src="./RepresentativeView.css" scoped></style>
