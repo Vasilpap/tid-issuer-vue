@@ -6,8 +6,11 @@ import Unauthorized       from '@/views/Unauthorized.vue';
 import NotFound           from '@/views/NotFound.vue';
 
 const routes = [
-  /* Hit directly via guard above */
-  { path: '/',           component: { template: '<div />' } },
+  /* Root - will be redirected by guard */
+  {
+    path: '/',
+    component: { template: '<div style="padding: 2rem; text-align: center;">Loading...</div>' },
+  },
 
   /* Dashboards */
   {
