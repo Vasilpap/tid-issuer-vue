@@ -1,33 +1,38 @@
 # TID Issuer Frontend (Vue)
 
-Vue 3 SPA for the TID Issuer workflow. It authenticates users with Keycloak and shows role-specific dashboards for representatives and employees.
+Single-page application for representative and employee workflows.
 
 ## Stack
 
 - Vue 3 + Vue Router
 - Vite
-- Keycloak JS integration (`@dsb-norge/vue-keycloak-js`)
+- Keycloak JS (`@dsb-norge/vue-keycloak-js`)
 
-## Roles and Views
+## Role-Based Views
 
 - `Representative` -> registration dashboard
 - `Employee` -> processing dashboard
 
-Route guards enforce access based on Keycloak client roles from `quarkus-api`.
+Route guards validate `quarkus-api` client roles.
 
-## Local Development
+## Local Run
 
-1. Copy `.env.example` to `.env` and set values.
-2. Install dependencies and run dev server:
+1. Copy env file:
+
+```bash
+cp .env.example .env
+```
+
+2. Install and start:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Default dev URL: `http://localhost:5173`.
+Dev URL: `http://localhost:5173`.
 
-## Build and Quality
+## Build / Lint / Format
 
 ```bash
 npm run build
@@ -37,5 +42,5 @@ npm run format
 
 ## Notes
 
-- Configure backend URL with `VITE_API_BASE`.
-- Keep real credentials out of git; commit only template env files.
+- `VITE_API_BASE` can be empty when API is served via same-origin reverse proxy.
+- Keep real secrets only in local `.env`.
