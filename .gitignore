@@ -7,15 +7,31 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
-.DS_Store
+package-lock.json.bak
+
+# Build outputs
 dist
 dist-ssr
-coverage
-*.local
+build
+*.tsbuildinfo
 
-/cypress/videos/
-/cypress/screenshots/
+# Coverage
+coverage
+*.lcov
+.nyc_output
+
+# Environment variables (keep .env.example for documentation)
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
 .vscode/*
@@ -26,5 +42,16 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
 
-*.tsbuildinfo
+# Testing
+/cypress/videos/
+/cypress/screenshots/
+.nyc_output
+
+# Temporary files
+*.tmp
+*.bak
+.cache

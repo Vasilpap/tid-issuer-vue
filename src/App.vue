@@ -1,12 +1,11 @@
 <template>
-  <!-- Global header: role · username · logout -->
-  <header class="app-header">
+  <header v-if="isAuthenticated" class="app-header">
+    <span class="brand">TID Issuer</span>
     <span class="user-info">{{ userRole }} · {{ userName }}</span>
 
     <button class="logout-btn" @click="logout">Logout</button>
   </header>
 
-  <!-- Route outlet -->
   <RouterView class="route-wrapper" />
 </template>
 
@@ -14,10 +13,12 @@
 import { RouterView } from 'vue-router';
 import { computed } from 'vue';
 import { useKeycloak } from '@dsb-norge/vue-keycloak-js';
+import { API_CLIENT_ID } from './keycloak-config';
 
 const { keycloak } = useKeycloak();
 
-// --- user info -----------------------------------------------------------
+const isAuthenticated = computed(() => keycloak.authenticated);
+
 const userName = computed(() => {
   if (!keycloak.authenticated) return '';
   const tp = keycloak.tokenParsed || {};
@@ -26,8 +27,8 @@ const userName = computed(() => {
 
 const userRole = computed(() => {
   if (!keycloak.authenticated) return '';
-  if (keycloak.hasRealmRole('Employee')) return 'Employee';
-  if (keycloak.hasRealmRole('Representative')) return 'Representative';
+  if (keycloak.hasResourceRole('Employee', API_CLIENT_ID)) return 'Employee';
+  if (keycloak.hasResourceRole('Representative', API_CLIENT_ID)) return 'Representative';
   return 'User';
 });
 
@@ -37,49 +38,68 @@ function logout() {
 </script>
 
 <style scoped>
-/* Header container */
 .app-header {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1.5rem; /* 12px 24px */
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb; /* light gray */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(6px);
 }
 
-/* Role · Username */
+.brand {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--brand-strong);
+}
+
 .user-info {
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #374151; /* gray-700 */
-  cursor: default; /* plain text, not interactive */
+  color: var(--muted);
+  cursor: default;
+  margin-left: auto;
 }
 
-/* Logout button */
 .logout-btn {
-  margin-left: auto;
-  background: #dc2626; /* red-600 */
+  background: var(--danger);
   color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 0.375rem 1rem; /* 6px 16px */
-  font-size: 0.75rem; /* text-xs */
-  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .logout-btn:hover {
-  background: #b91c1c; /* red-700 */
+  background: #a93b3b;
+  transform: translateY(-1px);
 }
 
 .logout-btn:focus {
-  outline: 2px solid #f87171; /* red-400 */
+  outline: 2px solid #e88584;
   outline-offset: 2px;
 }
 
-/* Route wrapper spacing */
 .route-wrapper {
-  padding: 1.5rem; /* 24px */
+  padding: 1.4rem 0.2rem 0;
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-wrap: wrap;
+  }
+
+  .user-info {
+    order: 3;
+    margin-left: 0;
+    width: 100%;
+  }
 }
 </style>
