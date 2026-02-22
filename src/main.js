@@ -24,6 +24,7 @@ app.use(VueKeycloak, {
   init: {
     onLoad: 'check-sso',
     checkLoginIframe: false,
+    pkceMethod: false,
     silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
   },
 
