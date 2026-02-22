@@ -25,16 +25,20 @@ function logout() {
   margin: 4rem auto;
   text-align: center;
   padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
 }
 
 h1 {
   margin: 0 0 1rem 0;
   font-size: 2rem;
-  color: #dc2626; /* red-600 */
+  color: #9f2928;
 }
 
 p {
-  color: #4b5563; /* gray-600 */
+  color: var(--muted);
   margin: 0.5rem 0;
   line-height: 1.6;
 }
@@ -42,30 +46,31 @@ p {
 .details {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: #fef2f2; /* red-50 */
+  background: #fff5f5;
   border-radius: 8px;
-  border: 1px solid #fecaca; /* red-200 */
+  border: 1px solid #f0c1c1;
 }
 
 .logout-btn {
   margin-top: 2rem;
-  background: #dc2626; /* red-600 */
+  background: var(--danger);
   color: #fff;
   border: none;
   border-radius: 6px;
   padding: 0.75rem 2rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease-in-out;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .logout-btn:hover {
-  background: #b91c1c; /* red-700 */
+  background: #a93b3b;
+  transform: translateY(-1px);
 }
 
 .logout-btn:focus {
-  outline: 2px solid #f87171; /* red-400 */
+  outline: 2px solid #e88584;
   outline-offset: 2px;
 }
 </style>

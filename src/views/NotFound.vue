@@ -14,14 +14,20 @@
   max-width: 560px;
   margin: 4rem auto;
   text-align: center;
+  padding: 2rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft);
 }
 
 h1 {
   margin: 0 0 0.5rem 0;
   font-size: 2rem;
+  color: #1a3d4a;
 }
 
 p {
-  color: #4b5563; /* gray-600 */
+  color: var(--muted);
 }
 </style>

@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import HomeView           from '@/views/HomeView.vue';
 import EmployeeView       from '@/views/EmployeeView.vue';
 import RepresentativeView from '@/views/RepresentativeView.vue';
 import Unauthorized       from '@/views/Unauthorized.vue';
 import NotFound           from '@/views/NotFound.vue';
 
 const routes = [
-  /* Root - will be redirected by guard */
   {
     path: '/',
-    component: { template: '<div style="padding: 2rem; text-align: center;">Loading...</div>' },
+    component: HomeView,
+    meta: { title: 'Home' },
   },
 
   /* Dashboards */

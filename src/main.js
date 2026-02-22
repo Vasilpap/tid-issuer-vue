@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
+import './assets/main.css';
 
 import VueKeycloak from '@dsb-norge/vue-keycloak-js';
 import kcConfig, { API_CLIENT_ID } from './keycloak-config';
@@ -21,13 +22,14 @@ app.config.errorHandler = (err, instance, info) => {
 app.use(VueKeycloak, {
   config: kcConfig,
   init: {
-    onLoad: 'login-required',
+    onLoad: 'check-sso',
     checkLoginIframe: false,
+    silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
   },
 
   /* ──────────────────────────────────────────────────────────────────
    *  Runs WHEN - AND ONLY WHEN - Keycloak is fully initialised.
-   *  We register our guards here so we can safely call hasRealmRole().
+   *  We register our guards here so we can safely call hasResourceRole().
    * ────────────────────────────────────────────────────────────────── */
   onReady(keycloak) {
     console.log('Keycloak ready!');
@@ -40,27 +42,17 @@ app.use(VueKeycloak, {
     // Helper to check client roles on the API client
     const hasRole = (role) => keycloak.hasResourceRole(role, API_CLIENT_ID);
 
-    /* ---------- 1. Role-based guard + smart root redirect ---------- */
+    /* ---------- 1. Role-based guard ---------- */
     router.beforeEach((to, from, next) => {
       console.log(`Navigating from ${from.path} to ${to.path}`);
 
-      /* If the user just hit "/" (or refreshed at "/"), decide where to go */
-      if (to.path === '/') {
-        if (hasRole('Representative')) {
-          console.log('User has Representative role, redirecting to /representative');
-          return next('/representative');
-        } else if (hasRole('Employee')) {
-          console.log('User has Employee role, redirecting to /employee');
-          return next('/employee');
-        } else {
-          console.log('User has no valid role, redirecting to /unauthorized');
-          // User has no valid role
-          return next('/unauthorized');
-        }
-      }
-
-      /* All other paths: check route.meta.roles, if any */
+      /* Protected paths: user must be authenticated and have matching role */
       if (to.meta?.roles?.length) {
+        if (!keycloak.authenticated) {
+          console.log('Protected route requires authentication, redirecting to /');
+          return next('/');
+        }
+
         const ok = to.meta.roles.some((r) => hasRole(r));
         console.log(`Route ${to.path} requires roles:`, to.meta.roles, 'User has access:', ok);
         if (!ok) return next('/unauthorized');
