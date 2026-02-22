@@ -6,11 +6,35 @@ import './assets/main.css';
 import VueKeycloak from '@dsb-norge/vue-keycloak-js';
 import kcConfig, { API_CLIENT_ID } from './keycloak-config';
 
+function ensureRandomUuidForHttpLab() {
+  const globalCrypto = window.crypto;
+  if (!globalCrypto || typeof globalCrypto.randomUUID === 'function') {
+    return;
+  }
+
+  if (typeof globalCrypto.getRandomValues !== 'function') {
+    return;
+  }
+
+  globalCrypto.randomUUID = () => {
+    const bytes = new Uint8Array(16);
+    globalCrypto.getRandomValues(bytes);
+
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /*  Bootstrap                                                         */
 /* ------------------------------------------------------------------ */
 console.log('Starting application...');
 console.log('Keycloak config:', kcConfig);
+
+ensureRandomUuidForHttpLab();
 
 const app = createApp(App);
 
