@@ -1,35 +1,41 @@
-# tid-issuer-vue
+# TID Issuer Frontend (Vue)
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 SPA for the TID Issuer workflow. It authenticates users with Keycloak and shows role-specific dashboards for representatives and employees.
 
-## Recommended IDE Setup
+## Stack
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Vue 3 + Vue Router
+- Vite
+- Keycloak JS integration (`@dsb-norge/vue-keycloak-js`)
 
-## Customize configuration
+## Roles and Views
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- `Representative` -> registration dashboard
+- `Employee` -> processing dashboard
 
-## Project Setup
+Route guards enforce access based on Keycloak client roles from `quarkus-api`.
 
-```sh
+## Local Development
+
+1. Copy `.env.example` to `.env` and set values.
+2. Install dependencies and run dev server:
+
+```bash
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+Default dev URL: `http://localhost:5173`.
 
-```sh
+## Build and Quality
+
+```bash
 npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
 npm run lint
+npm run format
 ```
+
+## Notes
+
+- Configure backend URL with `VITE_API_BASE`.
+- Keep real credentials out of git; commit only template env files.
